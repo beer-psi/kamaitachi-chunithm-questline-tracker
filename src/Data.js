@@ -29,6 +29,22 @@ const GRADES = {
     SSS: 12,
     SSS_PLUS: 13,
 };
+const GRADE_BOUNDARIES = [
+    { name: "D", lowerBound: 0 },
+    { name: "C", lowerBound: 500000 },
+    { name: "B", lowerBound: 600000 },
+    { name: "BB", lowerBound: 700000 },
+    { name: "BBB", lowerBound: 800000 },
+    { name: "A", lowerBound: 900000 },
+    { name: "AA", lowerBound: 925000 },
+    { name: "AAA", lowerBound: 950000 },
+    { name: "S", lowerBound: 975000 },
+    { name: "S+", lowerBound: 990000 },
+    { name: "SS", lowerBound: 1000000 },
+    { name: "SS+", lowerBound: 1005000 },
+    { name: "SSS", lowerBound: 1007500 },
+    { name: "SSS+", lowerBound: 1009000 },
+];
 
 /**
  * An object defining a goal.

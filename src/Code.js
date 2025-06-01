@@ -2,38 +2,43 @@
 /**
  * Kamaitachi Questline Tracker
  * 
- * Created by beerpsi on 2025-05-27
+ * Created by beerpsi on 2025-05-27.
+ * 
  * Changelog:
  * - 2025-05-28: Fixed the conditions for 99AJ goals
- * 
- * Licensed under the MIT license. You can use this as a base for another questline tracker,
- * but please credit me (putting just a note in the script is okay).
+ * - 2025-05-30: Added goal progress indicator, PB notes for chart goals, feature flags support, and checkbox colors for chart goals (by triple_sigma)
+ * - 2025-06-01: Reworked goal progress indicator system
  * 
  * You can now contribute to the code by making a pull request on GitHub at
  *     https://github.com/beer-psi/kamaitachi-chunithm-questline-tracker
  * 
- * For future maintainers (could just be me), functions that start with _ should not be run directly.
+ * Licensed under the MIT license. You can use this as a base for another questline tracker,
+ * but please leave the credits intact.
+ *  
  */
 const CURRENT_CHUNITHM_VERSION = "verse";
+const CONFIG_CELLS = {
+    USERNAME: "Home!C18",
+    ENABLE_GRADE_COLORS: "Home!D102",
+};
 
 /**
- * Gets a key from the given object. It accepts deep traversal using dot notation
- * (e.g. "parent.child")
+ * A CHUNITHM chart document from Kamaitachi.
+ * 
+ * @typedef {{
+ *   chartID: string;
+ *   data: {
+ *     inGameID: number;
+ *   };
+ *   difficulty: "BASIC" | "ADVANCED" | "EXPERT" | "MASTER" | "ULTIMA";
+ *   isPrimary: boolean;
+ *   level: string;
+ *   levelNum: number;
+ *   playtype: "Single";
+ *   songID: number;
+ *   versions: string[];
+ * }} ChartDocument
  */
-function _getValue(obj, key) {
-    const path = key.split(".");
-    let value = obj;
-
-    for (const p of path) {
-        if (value && typeof value === "object" && p in value) {
-            value = value[p];
-        } else {
-            return undefined;
-        }
-    }
-
-    return value;
-}
 
 /**
  * Convert task tracks from the spreadsheet into goal objects.
@@ -218,9 +223,16 @@ function checkGoals() {
     const charts = JSON.parse(chartsResp.getContentText());
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), "Home!C18")["values"][0][0];
+    const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
+    // const enableColors = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.ENABLE_GRADE_COLORS)["values"][0][0];
+    const enableColors = false;
+
+    Logger.log("Configuration:");
+    Logger.log(`- Username: ${username}`);
+    Logger.log(`- Checkbox colors: ${enableColors}`);
 
     Logger.log(`Getting PBs for ${username}`);
+
     const pbResp = UrlFetchApp.fetch(`https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/Single/pbs/all`);
     const data = JSON.parse(pbResp.getContentText());
 
@@ -231,41 +243,30 @@ function checkGoals() {
     // Note that we do not interfere with manually checked goals; we will check a goal as completed
     // if it is completed on Tachi, but that's it.
 
-    const batchWriteRequest = {
-        valueInputOption: "USER_ENTERED",
-        data: [],
-    };
+    /**
+     * @type {GoogleAppsScript.Sheets.Schema.Request[]}
+     */
+    const batchUpdateRequests = [];
 
     for (const questline of QUESTLINES) {
         Logger.log(`Checking goals for questline ${questline.sheet}`);
 
+        const sheet = spreadsheet.getSheetByName(questline.sheet);
+
+        if (sheet === null) {
+            Logger.log(`Could not get sheet for questline ${questline.sheet}`);
+            continue;
+        }
+
+        const sheetId = sheet.getSheetId();
+
         for (const goal of questline.goals) {
-            const relevantCharts = charts.filter((c) => {
-                // disregard all charts that are not in the current version
-                if (!c.versions.includes(CURRENT_CHUNITHM_VERSION)) {
-                    return false;
-                }
+            if (!["absolute", "proportion"].includes(goal.criteria.mode)) {
+                Logger.log(`Unknown goal criteria mode: ${goal.criteria.mode}`);
+                continue;
+            }
 
-                return Object.entries(goal.charts).every(([key, value]) => {
-                    if (Array.isArray(c[key]) && Array.isArray(value)) {
-                        // if both are arrays, check if they have any common elements
-                        return c[key].some((v) => value.includes(v));
-                    }
-
-                    if (Array.isArray(c[key]) && !Array.isArray(value)) {
-                        // if the chart has an array and the goal has a single value, check if the chart's array includes that value
-                        return c[key].includes(value);
-                    }
-
-                    if (!Array.isArray(c[key]) && Array.isArray(value)) {
-                        // if the chart has a single value and the goal has an array, check if the chart's value is in the goal's array
-                        return value.includes(c[key]);
-                    }
-
-                    // otherwise, just check for equality
-                    return c[key] === value;
-                });
-            });
+            const relevantCharts = filterRelevantCharts(charts, goal);
 
             Logger.log(`Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(goal.charts)}`);
 
@@ -277,25 +278,109 @@ function checkGoals() {
             const count = relevantPBs.reduce(
                 (acc, pb) => acc + Number(_getValue(pb, goal.criteria.key) >= goal.criteria.value),
                 0,
-            );
-            let goalMet = false;
+            );            
+            let requiredCount = 0;
 
             if (goal.criteria.mode === "absolute") {
-                goalMet = count >= goal.criteria.countNum;
+                requiredCount = goal.criteria.countNum;
             } else if (goal.criteria.mode === "proportion") {
-                goalMet = count / relevantCharts.length >= goal.criteria.countNum;
+                requiredCount = Math.floor(relevantCharts.length * goal.criteria.countNum);
+            }
+            
+            const goalMet = count >= requiredCount;
+
+            /**
+             * @type {GoogleAppsScript.Sheets.Schema.CellData}
+             */
+            const cellData = {};
+
+            /**
+             * @type {string[]}
+             */
+            const fields = [];
+
+            /**
+             * @type {string | null}
+             */
+            let progressColor = null;
+
+            if (goal.criteria.mode === "absolute" && goal.criteria.countNum === 1) {
+                let bestPB;
+
+                if (relevantCharts.length === 1) {
+                    // goal on a single chart
+                    bestPB = relevantPBs[0];
+                } else {
+                    // goal on any chart
+                    const maxProgress = Math.max(...relevantPBs.map((pb) => _getValue(pb, goal.criteria.key)));
+
+                    bestPB = relevantPBs.find((pb) => _getValue(pb, goal.criteria.key) === maxProgress);
+                }
+
+                cellData.note = humanizeGoalProgress(goal.criteria.key, goal.criteria.value, bestPB);
+
+                if (bestPB) {
+                    progressColor = goal.criteria.key === "scoreData.enumIndexes.grade"
+                        ? getProgressColorFromScore(bestPB.scoreData.score)
+                        : getProgressColor(_getValue(bestPB, goal.criteria.key) / goal.criteria.value);
+                }
+            } else if (goal.criteria.mode === "absolute") {
+                cellData.note = `${count} / ${requiredCount}`;
+                progressColor = getProgressColor(count / requiredCount);
+            } else if (goal.criteria.mode === "proportion") {
+                cellData.note = `${count} / ${requiredCount} (${Math.floor(count / relevantCharts.length * 10000) / 100}%)`;
+                progressColor = getProgressColor(count / requiredCount);
+            }
+
+            if (cellData.note) {
+                fields.push("note");
             }
 
             if (goalMet) {
-                Logger.log(`Goal met: ${questline.sheet}!${goal.cell}`)
-                batchWriteRequest.data.push({
-                    range: `${questline.sheet}!${goal.cell}`,
-                    majorDimension: "ROWS",
-                    values: [[true]],
-                })
+                Logger.log(`Goal met: ${questline.sheet}!${goal.cell}`);
+
+                cellData.userEnteredValue = {
+                    boolValue: true
+                };
+                fields.push("userEnteredValue");
             }
+
+            if (enableColors && progressColor) {
+                cellData.userEnteredFormat = {
+                    backgroundColorStyle: {
+                        rgbColor: convertHexColor(progressColor),
+                    },
+                };
+                fields.push("userEnteredFormat.backgroundColorStyle");
+            } else if (!enableColors) {
+                // we don't set anything but put it in the list of fields to update
+                // so it uses the default value a.k.a. clearing the cell color
+                cellData.userEnteredFormat = {};
+                fields.push("userEnteredFormat.backgroundColorStyle");
+            }
+
+            /**
+             * @type {GoogleAppsScript.Sheets.Schema.Request}
+             */
+            const batchUpdateRequest = {
+                updateCells: {
+                    rows: [{ values: [cellData] }],
+                    fields: fields.join(","),
+                    start: {
+                        sheetId,
+                        ...convertA1ToRowColumn(goal.cell),
+                    }
+                }
+            }
+
+            batchUpdateRequests.push(batchUpdateRequest);
         }
     }
 
-    Sheets.Spreadsheets.Values.batchUpdate(batchWriteRequest, spreadsheet.getId());
+    Sheets.Spreadsheets.batchUpdate(
+        {
+            requests: batchUpdateRequests,
+        },
+        spreadsheet.getId()
+    );
 }
