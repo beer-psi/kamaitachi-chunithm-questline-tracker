@@ -10,7 +10,7 @@ index a407efe..b945bf5 100644
    "scriptExtensions": [
      ".js",
 diff --git a/src/Code.js b/src/Code.js
-index f8ebdb8..c24f245 100644
+index b227884..cebc98a 100644
 --- a/src/Code.js
 +++ b/src/Code.js
 @@ -16,9 +16,9 @@
@@ -25,3 +25,601 @@ index f8ebdb8..c24f245 100644
      ENABLE_GRADE_COLORS: "Home!D102",
  };
  
+diff --git a/src/Data.js b/src/Data.js
+index c8902f6..68fc043 100644
+--- a/src/Data.js
++++ b/src/Data.js
+@@ -2082,19 +2082,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // 乙女戦士☆あーし。 [MASTER]
+-                "cell": "P32",
+-                "charts": {
+-                    "chartID": "4b4a7b894d603c14c2a451ecab0a4090b8a9b01d"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // 乙女戦士☆あーし。 [MASTER]
++            //     "cell": "P32",
++            //     "charts": {
++            //         "chartID": "4b4a7b894d603c14c2a451ecab0a4090b8a9b01d"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // Stronghold LandEater [MASTER]
+                 "cell": "P34",
+@@ -2633,19 +2633,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // チューリングの跡 [EXPERT]
+-                "cell": "P30",
+-                "charts": {
+-                    "chartID": "c72e43d299d5e64ac9789ed74d24b27a68e9b750"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // チューリングの跡 [EXPERT]
++            //     "cell": "P30",
++            //     "charts": {
++            //         "chartID": "c72e43d299d5e64ac9789ed74d24b27a68e9b750"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // 宙の隣 [MASTER]
+                 "cell": "P32",
+@@ -3301,19 +3301,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // おしゃまなプリンセス [MASTER]
+-                "cell": "U40",
+-                "charts": {
+-                    "chartID": "14939f2709f1ec432b6ae7a98ce647ca2ec61dfd"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // おしゃまなプリンセス [MASTER]
++            //     "cell": "U40",
++            //     "charts": {
++            //         "chartID": "14939f2709f1ec432b6ae7a98ce647ca2ec61dfd"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // Satellite System ft.Diana Chiaki [MASTER]
+                 "cell": "AA30",
+@@ -3592,19 +3592,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Ai C [MASTER]
+-                "cell": "F40",
+-                "charts": {
+-                    "chartID": "bc32689afd96c83d1fa7d864672d3f351dff34ae"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Ai C [MASTER]
++            //     "cell": "F40",
++            //     "charts": {
++            //         "chartID": "bc32689afd96c83d1fa7d864672d3f351dff34ae"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // Destr0yer [MASTER]
+                 "cell": "K30",
+@@ -3878,19 +3878,19 @@ const QUESTLINES = [
+                     "value": CLEAR_LAMPS.CLEAR
+                 }
+             },
+-            {
+-                // 〚空虚〛 ～Pyrophilia [MASTER]
+-                "cell": "AA36",
+-                "charts": {
+-                    "chartID": "61fb6f6537c65d40aa93b904b9a0697f18810f40"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.clearLamp",
+-                    "value": CLEAR_LAMPS.CLEAR
+-                }
+-            },
++            // {
++            //     // 〚空虚〛 ～Pyrophilia [MASTER]
++            //     "cell": "AA36",
++            //     "charts": {
++            //         "chartID": "61fb6f6537c65d40aa93b904b9a0697f18810f40"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.clearLamp",
++            //         "value": CLEAR_LAMPS.CLEAR
++            //     }
++            // },
+             {
+                 // 月の光 [MASTER]
+                 "cell": "AA38",
+@@ -4182,19 +4182,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Malleus Maleficarum [MASTER]
+-                "cell": "K34",
+-                "charts": {
+-                    "chartID": "d698f7d010152e0ccdcb5ead6ce098cca72b1ab3"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Malleus Maleficarum [MASTER]
++            //     "cell": "K34",
++            //     "charts": {
++            //         "chartID": "d698f7d010152e0ccdcb5ead6ce098cca72b1ab3"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // AttraqtiA [MASTER]
+                 "cell": "K36",
+@@ -4247,19 +4247,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // ÅMARA (大未来電脳) [MASTER]
+-                "cell": "P32",
+-                "charts": {
+-                    "chartID": "7b65deb94bcfca21109b87bb2463d89f59b59dbc"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // ÅMARA (大未来電脳) [MASTER]
++            //     "cell": "P32",
++            //     "charts": {
++            //         "chartID": "7b65deb94bcfca21109b87bb2463d89f59b59dbc"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // 猛進ソリストライフ！ [ULTIMA]
+                 "cell": "P34",
+@@ -4642,19 +4642,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Vampire [ULTIMA]
+-                "cell": "F34",
+-                "charts": {
+-                    "chartID": "7c2276f269c54894f896f54b16a9d10344e8e8df"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Vampire [ULTIMA]
++            //     "cell": "F34",
++            //     "charts": {
++            //         "chartID": "7c2276f269c54894f896f54b16a9d10344e8e8df"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // 幻想即興曲 [MASTER]
+                 "cell": "F36",
+@@ -4668,19 +4668,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // 黎命に殉ず [MASTER]
+-                "cell": "F38",
+-                "charts": {
+-                    "chartID": "ccbae90e91b6ec32b1f49519fca0604f7e2896e0"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // 黎命に殉ず [MASTER]
++            //     "cell": "F38",
++            //     "charts": {
++            //         "chartID": "ccbae90e91b6ec32b1f49519fca0604f7e2896e0"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // 電光石火 [MASTER]
+                 "cell": "K30",
+@@ -4707,19 +4707,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Latent Kingdom [MASTER]
+-                "cell": "K34",
+-                "charts": {
+-                    "chartID": "954afbc58d2e849ce4f0fbc26c5225de1724acf3"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Latent Kingdom [MASTER]
++            //     "cell": "K34",
++            //     "charts": {
++            //         "chartID": "954afbc58d2e849ce4f0fbc26c5225de1724acf3"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // YURUSHITE [MASTER]
+                 "cell": "K36",
+@@ -4837,19 +4837,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // マシンガンポエムドール [MASTER]
+-                "cell": "U34",
+-                "charts": {
+-                    "chartID": "6a3bc15c324a19817877e51a9cf96a0396f60335"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // マシンガンポエムドール [MASTER]
++            //     "cell": "U34",
++            //     "charts": {
++            //         "chartID": "6a3bc15c324a19817877e51a9cf96a0396f60335"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // 赤壁、大炎上！！ [MASTER]
+                 "cell": "U36",
+@@ -5115,19 +5115,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // What's up? Pop! [MASTER]
+-                "cell": "F34",
+-                "charts": {
+-                    "chartID": "2e214dbee0b2d6285377de1be95c5fb7f5510ad4"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // What's up? Pop! [MASTER]
++            //     "cell": "F34",
++            //     "charts": {
++            //         "chartID": "2e214dbee0b2d6285377de1be95c5fb7f5510ad4"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // Killing Rhythm [MASTER]
+                 "cell": "F36",
+@@ -5206,19 +5206,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Stardust:RAY [MASTER]
+-                "cell": "K36",
+-                "charts": {
+-                    "chartID": "98ce87489990e2b047f348479c3641ad7aa8003c"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Stardust:RAY [MASTER]
++            //     "cell": "K36",
++            //     "charts": {
++            //         "chartID": "98ce87489990e2b047f348479c3641ad7aa8003c"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // Trrricksters!! [MASTER]
+                 "cell": "K38",
+@@ -5232,19 +5232,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Crush the Dystopia [MASTER]
+-                "cell": "K40",
+-                "charts": {
+-                    "chartID": "9d9ab3605b75d087839e1958bef994cdc6787ec0"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Crush the Dystopia [MASTER]
++            //     "cell": "K40",
++            //     "charts": {
++            //         "chartID": "9d9ab3605b75d087839e1958bef994cdc6787ec0"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // X7124 [MASTER]
+                 "cell": "P30",
+@@ -5284,19 +5284,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // リ・フィクション・O [MASTER]
+-                "cell": "P36",
+-                "charts": {
+-                    "chartID": "990a4180cfbf9e4f405b0bdec2f7a336469a9a7c"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // リ・フィクション・O [MASTER]
++            //     "cell": "P36",
++            //     "charts": {
++            //         "chartID": "990a4180cfbf9e4f405b0bdec2f7a336469a9a7c"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // macrocosmos [MASTER]
+                 "cell": "P38",
+@@ -5310,19 +5310,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // Acid God [MASTER]
+-                "cell": "P40",
+-                "charts": {
+-                    "chartID": "ca4688064e5165a8d16dbee541364078c2305d27"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // Acid God [MASTER]
++            //     "cell": "P40",
++            //     "charts": {
++            //         "chartID": "ca4688064e5165a8d16dbee541364078c2305d27"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // ENDYMION [MASTER]
+                 "cell": "U30",
+@@ -5375,19 +5375,19 @@ const QUESTLINES = [
+                     "value": GRADES.SSS
+                 }
+             },
+-            {
+-                // The Devil Incarnate [MASTER]
+-                "cell": "U38",
+-                "charts": {
+-                    "chartID": "1831e26ef2bef08eaadc53b27c59c2aa43027cd4"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.grade",
+-                    "value": GRADES.SSS
+-                }
+-            },
++            // {
++            //     // The Devil Incarnate [MASTER]
++            //     "cell": "U38",
++            //     "charts": {
++            //         "chartID": "1831e26ef2bef08eaadc53b27c59c2aa43027cd4"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.grade",
++            //         "value": GRADES.SSS
++            //     }
++            // },
+             {
+                 // Rebellion [MASTER]
+                 "cell": "U40",
+@@ -5427,19 +5427,19 @@ const QUESTLINES = [
+                     "value": CLEAR_LAMPS.CLEAR
+                 }
+             },
+-            {
+-                // LibrariA [MASTER]
+-                "cell": "AA34",
+-                "charts": {
+-                    "chartID": "7aa08c48ee8aeaf8cb392f9a321442918af8388f"
+-                },
+-                "criteria": {
+-                    "mode": "absolute",
+-                    "countNum": 1,
+-                    "key": "scoreData.enumIndexes.clearLamp",
+-                    "value": CLEAR_LAMPS.CLEAR
+-                }
+-            },
++            // {
++            //     // LibrariA [MASTER]
++            //     "cell": "AA34",
++            //     "charts": {
++            //         "chartID": "7aa08c48ee8aeaf8cb392f9a321442918af8388f"
++            //     },
++            //     "criteria": {
++            //         "mode": "absolute",
++            //         "countNum": 1,
++            //         "key": "scoreData.enumIndexes.clearLamp",
++            //         "value": CLEAR_LAMPS.CLEAR
++            //     }
++            // },
+             {
+                 // 玩具狂奏曲 -終焉- [MASTER]
+                 "cell": "AA36",
