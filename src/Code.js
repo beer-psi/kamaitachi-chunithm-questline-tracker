@@ -345,6 +345,8 @@ function checkGoals() {
                 fields.push("userEnteredValue");
             }
 
+            const coordinates = convertA1ToRowColumn(goal.cell);
+
             if (enableColors && progressColor) {
                 cellData.userEnteredFormat = {
                     backgroundColorStyle: {
@@ -353,9 +355,27 @@ function checkGoals() {
                 };
                 fields.push("userEnteredFormat.backgroundColorStyle");
             } else if (!enableColors) {
-                // we don't set anything but put it in the list of fields to update
-                // so it uses the default value a.k.a. clearing the cell color
                 cellData.userEnteredFormat = {};
+
+                // to preserve style we need to know what color to set
+                const checklistLastIndex = (questline.sheet.includes("Rainbow") || questline.sheet === "Endgame")
+                    ? 23
+                    : 17;
+            
+                if (coordinates.rowIndex <= checklistLastIndex) {
+                    // checklist table
+                    cellData.userEnteredFormat.backgroundColorStyle = {
+                        rgbColor: coordinates.rowIndex % 2 === 0
+                            ? convertHexColor("#ffffff")
+                            : convertHexColor("#efefef"),
+                    };
+                } else {
+                    // chart goals
+                    cellData.userEnteredFormat.backgroundColorStyle = {
+                        rgbColor: convertHexColor("#efefef"),
+                    };
+                }
+                
                 fields.push("userEnteredFormat.backgroundColorStyle");
             }
 
@@ -368,7 +388,7 @@ function checkGoals() {
                     fields: fields.join(","),
                     start: {
                         sheetId,
-                        ...convertA1ToRowColumn(goal.cell),
+                        ...coordinates,
                     }
                 }
             }
