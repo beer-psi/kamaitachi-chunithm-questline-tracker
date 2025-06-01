@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Gets a key from the given object. It accepts deep traversal using dot notation
  * (e.g. "parent.child")

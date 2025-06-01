@@ -1,4 +1,4 @@
-
+// SPDX-License-Identifier: MIT
 /**
  * @param {string} criteriaKey 
  * @param {number} criteriaValue 
