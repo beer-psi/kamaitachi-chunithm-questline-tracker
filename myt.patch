@@ -1,0 +1,27 @@
+diff --git a/.clasp.json b/.clasp.json
+index a407efe..b945bf5 100644
+--- a/.clasp.json
++++ b/.clasp.json
+@@ -1,5 +1,5 @@
+ {
+-  "scriptId": "1wQtvMT9AMWdoTu2pGLOS3nc9JS21faID2I40kXhiWxyLe8iN69AWXK6y",
++  "scriptId": "1CTyDGm46xB4F3p4xnjY3264Hhb9oWZdHY3ZwhATB1UGDgHec21T_IHw8",
+   "rootDir": "src",
+   "scriptExtensions": [
+     ".js",
+diff --git a/src/Code.js b/src/Code.js
+index f8ebdb8..c24f245 100644
+--- a/src/Code.js
++++ b/src/Code.js
+@@ -16,9 +16,9 @@
+  * but please leave the credits intact.
+  *  
+  */
+-const CURRENT_CHUNITHM_VERSION = "verse";
++const CURRENT_CHUNITHM_VERSION = "luminous";
+ const CONFIG_CELLS = {
+-    USERNAME: "Home!C18",
++    USERNAME: "Home!C20",
+     ENABLE_GRADE_COLORS: "Home!D102",
+ };
+ 
