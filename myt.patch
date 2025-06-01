@@ -10,10 +10,10 @@ index a407efe..b945bf5 100644
    "scriptExtensions": [
      ".js",
 diff --git a/src/Code.js b/src/Code.js
-index b227884..cebc98a 100644
+index 76effb8..034deff 100644
 --- a/src/Code.js
 +++ b/src/Code.js
-@@ -16,9 +16,9 @@
+@@ -16,10 +16,10 @@
   * but please leave the credits intact.
   *  
   */
@@ -21,10 +21,12 @@ index b227884..cebc98a 100644
 +const CURRENT_CHUNITHM_VERSION = "luminous";
  const CONFIG_CELLS = {
 -    USERNAME: "Home!C18",
+-    ENABLE_GRADE_COLORS: "Home!K53",
 +    USERNAME: "Home!C20",
-     ENABLE_GRADE_COLORS: "Home!D102",
++    ENABLE_GRADE_COLORS: "Home!K57",
  };
  
+ /**
 diff --git a/src/Data.js b/src/Data.js
 index c8902f6..68fc043 100644
 --- a/src/Data.js
