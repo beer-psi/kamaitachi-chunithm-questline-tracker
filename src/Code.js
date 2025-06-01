@@ -23,24 +23,6 @@ const CONFIG_CELLS = {
 };
 
 /**
- * A CHUNITHM chart document from Kamaitachi.
- * 
- * @typedef {{
- *   chartID: string;
- *   data: {
- *     inGameID: number;
- *   };
- *   difficulty: "BASIC" | "ADVANCED" | "EXPERT" | "MASTER" | "ULTIMA";
- *   isPrimary: boolean;
- *   level: string;
- *   levelNum: number;
- *   playtype: "Single";
- *   songID: number;
- *   versions: string[];
- * }} ChartDocument
- */
-
-/**
  * Convert task tracks from the spreadsheet into goal objects.
  * This doesn't convert into actual goal objects, but something very close, for later postprocessing:
  * - Replace /"title": "(.+?)",/ with "// $1"
@@ -284,6 +266,10 @@ function checkGoals() {
     Logger.log(`Getting PBs for ${username}`);
 
     const pbResp = UrlFetchApp.fetch(`https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/Single/pbs/all`);
+
+    /**
+     * @type {KamaitachiAPIResponse<{ pbs: PersonalBest[] }>}
+     */
     const data = JSON.parse(pbResp.getContentText());
 
     if (!data.success) {
@@ -362,6 +348,9 @@ function checkGoals() {
             let progress = null;
 
             if (isSingleGoal) {
+                /**
+                 * @type {PersonalBest | undefined}
+                 */
                 let bestPB;
 
                 if (relevantCharts.length === 1) {

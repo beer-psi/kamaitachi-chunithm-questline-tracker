@@ -76,10 +76,10 @@ const GRADE_BOUNDARIES = [
  * 
  * @typedef {{
  *  cell: string;
- *  charts: object;
+ *  charts: Record<Leaves<ChartDocument>, any>;
  *  criteria: {
  *    mode: "absolute" | "proportion";
- *    key: string;
+ *    key: Leaves<PersonalBest>;
  *    value: number;
  *    countNum: number;
  *  }
@@ -103,7 +103,7 @@ const QUESTLINES = [
                 // Clear 20 charts of MASTER difficulty
                 "cell": "U7",
                 "charts": {
-                    "difficulty": ["MASTER"]
+                    "difficulty": ["MASTER"],
                 },
                 "criteria": {
                     "mode": "absolute",

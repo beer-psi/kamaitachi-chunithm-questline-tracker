@@ -31,23 +31,25 @@ function filterRelevantCharts(charts, goal) {
         }
 
         return Object.entries(goal.charts).every(([key, value]) => {
-            if (Array.isArray(c[key]) && Array.isArray(value)) {
+            const chartValue = _getValue(c, key);
+
+            if (Array.isArray(chartValue) && Array.isArray(value)) {
                 // if both are arrays, check if they have any common elements
-                return c[key].some((v) => value.includes(v));
+                return chartValue.some((v) => value.includes(v));
             }
 
-            if (Array.isArray(c[key]) && !Array.isArray(value)) {
+            if (Array.isArray(chartValue) && !Array.isArray(value)) {
                 // if the chart has an array and the goal has a single value, check if the chart's array includes that value
-                return c[key].includes(value);
+                return chartValue.includes(value);
             }
 
-            if (!Array.isArray(c[key]) && Array.isArray(value)) {
+            if (!Array.isArray(chartValue) && Array.isArray(value)) {
                 // if the chart has a single value and the goal has an array, check if the chart's value is in the goal's array
-                return value.includes(c[key]);
+                return value.includes(chartValue);
             }
 
             // otherwise, just check for equality
-            return c[key] === value;
+            return chartValue === value;
         });
     });
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
- * @param {string} criteriaKey 
+ * @param {Leaves<PersonalBest>} criteriaKey 
  * @param {number} criteriaValue 
  */
 function humanizeGoalCriteria(criteriaKey, criteriaValue) {
@@ -21,7 +21,7 @@ function humanizeGoalCriteria(criteriaKey, criteriaValue) {
 }
 
 /**
- * @param {string} grade 
+ * @param {Grade} grade 
  */
 function wrapGrade(grade) {
     return (grade.endsWith("+") || grade.endsWith("-")) ? `(${grade})` : grade;
@@ -29,9 +29,9 @@ function wrapGrade(grade) {
 
 /**
  * 
- * @param {string} criteriaKey 
+ * @param {Leaves<PersonalBest>} criteriaKey 
  * @param {number} criteriaValue 
- * @param {object} pb 
+ * @param {PersonalBest} pb 
  */
 function humanizeGoalProgress(criteriaKey, criteriaValue, pb) {
     const outOf = humanizeGoalCriteria(criteriaKey, criteriaValue);
