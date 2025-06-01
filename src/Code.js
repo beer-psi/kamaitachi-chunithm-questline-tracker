@@ -19,7 +19,7 @@
 const CURRENT_CHUNITHM_VERSION = "verse";
 const CONFIG_CELLS = {
     USERNAME: "Home!C18",
-    ENABLE_GRADE_COLORS: "Home!D102",
+    ENABLE_GRADE_COLORS: "Home!K53",
 };
 
 /**
@@ -216,35 +216,45 @@ function clearGoals() {
         for (const goal of questline.goals) {
             const coordinates = convertA1ToRowColumn(goal.cell);
 
-            /**
-             * @type {GoogleAppsScript.Sheets.Schema.CellData}
-             */
-            const cellData = {
-                userEnteredValue: {
-                    boolValue: false,
-                },
-                userEnteredFormat: {
-                    backgroundColorStyle: {
-                        rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
-                    },
-                },
-            };
-
-            /**
-             * @type {GoogleAppsScript.Sheets.Schema.Request}
-             */
-            const batchUpdateRequest = {
+            batchUpdateRequests.push({
                 updateCells: {
-                    rows: [{ values: [cellData] }],
+                    rows: [
+                        {
+                            values: [
+                                {
+                                    userEnteredValue: {
+                                        boolValue: false,
+                                    },
+                                    userEnteredFormat: {
+                                        backgroundColorStyle: {
+                                            rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
+                                        },
+                                    },
+                                }
+                            ],
+                        },
+                    ],
                     fields: "userEnteredValue,note,userEnteredFormat.backgroundColorStyle",
                     start: {
                         sheetId,
                         ...coordinates,
                     }
                 }
-            }
+            });
 
-            batchUpdateRequests.push(batchUpdateRequest);
+            if (isObjectiveChecklistCell(questline.sheet, coordinates)) {
+                batchUpdateRequests.push({
+                    updateCells: {
+                        rows: [{ values: [{}] }],
+                        fields: "userEnteredValue",
+                        start: {
+                            sheetId,
+                            rowIndex: coordinates.rowIndex,
+                            columnIndex: coordinates.columnIndex - 2,
+                        },
+                    },
+                });
+            }
         }
     }
     
@@ -265,8 +275,7 @@ function checkGoals() {
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
-    // const enableColors = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.ENABLE_GRADE_COLORS)["values"][0][0];
-    const enableColors = false;
+    const enableColors = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.ENABLE_GRADE_COLORS)["values"][0][0] == "TRUE";
 
     Logger.log("Configuration:");
     Logger.log(`- Username: ${username}`);
@@ -307,6 +316,8 @@ function checkGoals() {
                 continue;
             }
 
+            const coordinates = convertA1ToRowColumn(goal.cell);
+            const isSingleGoal = goal.criteria.mode === "absolute" && goal.criteria.countNum === 1;
             const relevantCharts = filterRelevantCharts(charts, goal);
 
             Logger.log(`Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(goal.charts)}`);
@@ -345,7 +356,12 @@ function checkGoals() {
              */
             let progressColor = null;
 
-            if (goal.criteria.mode === "absolute" && goal.criteria.countNum === 1) {
+            /**
+             * @type {string | null}
+             */
+            let progress = null;
+
+            if (isSingleGoal) {
                 let bestPB;
 
                 if (relevantCharts.length === 1) {
@@ -358,22 +374,62 @@ function checkGoals() {
                     bestPB = relevantPBs.find((pb) => _getValue(pb, goal.criteria.key) === maxProgress);
                 }
 
-                cellData.note = humanizeGoalProgress(goal.criteria.key, goal.criteria.value, bestPB);
+                progress = humanizeGoalProgress(goal.criteria.key, goal.criteria.value, bestPB);
 
                 if (bestPB) {
                     progressColor = goal.criteria.key === "scoreData.enumIndexes.grade"
                         ? getProgressColorFromScore(bestPB.scoreData.score)
                         : getProgressColor(_getValue(bestPB, goal.criteria.key) / goal.criteria.value);
                 }
-            } else if (goal.criteria.mode === "absolute") {
-                cellData.note = `${count} / ${requiredCount}`;
-                progressColor = getProgressColor(count / requiredCount);
-            } else if (goal.criteria.mode === "proportion") {
-                cellData.note = `${count} / ${requiredCount} (${Math.floor(count / relevantCharts.length * 10000) / 100}%)`;
+            } else {
+                progress = `${count} / ${requiredCount}`;
                 progressColor = getProgressColor(count / requiredCount);
             }
 
-            if (cellData.note) {
+            // Write the progress in the previous cells if it's an objective checklist goal and
+            // is not a single goal.
+            if (progress && isObjectiveChecklistCell(questline.sheet, coordinates) && !isSingleGoal) {
+                batchUpdateRequests.push({
+                    updateCells: {
+                        rows: [
+                            {
+                                values: [
+                                    { userEnteredValue: { stringValue: progress } },
+                                ],
+                            },
+                        ],
+                        fields: "userEnteredValue",
+                        start: {
+                            sheetId,
+                            rowIndex: coordinates.rowIndex,
+                            columnIndex: coordinates.columnIndex - 2,
+                        },
+                    },
+                });
+            } else if (progress) {
+                // Is a single goal, but is an objective checklist goal
+                // (e.g. ALL JUSTICE any chart...)
+                if (isObjectiveChecklistCell(questline.sheet, coordinates)) {
+                    batchUpdateRequests.push({
+                        updateCells: {
+                            rows: [
+                                {
+                                    values: [
+                                        { userEnteredValue: { stringValue: `${count} / ${requiredCount}` } },
+                                    ],
+                                },
+                            ],
+                            fields: "userEnteredValue",
+                            start: {
+                                sheetId,
+                                rowIndex: coordinates.rowIndex,
+                                columnIndex: coordinates.columnIndex - 2,
+                            },
+                        },
+                    });
+                }
+                
+                cellData.note = progress;
                 fields.push("note");
             }
 
@@ -386,40 +442,42 @@ function checkGoals() {
                 fields.push("userEnteredValue");
             }
 
-            const coordinates = convertA1ToRowColumn(goal.cell);
-
-            if (enableColors && progressColor) {
-                cellData.userEnteredFormat = {
-                    backgroundColorStyle: {
-                        rgbColor: convertHexColor(progressColor),
-                    },
-                };
-                fields.push("userEnteredFormat.backgroundColorStyle");
-            } else if (!enableColors) {
-                cellData.userEnteredFormat = {
-                    backgroundColorStyle: {
-                        rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
-                    },
-                };
-                
-                fields.push("userEnteredFormat.backgroundColorStyle");
-            }
-
-            /**
-             * @type {GoogleAppsScript.Sheets.Schema.Request}
-             */
-            const batchUpdateRequest = {
-                updateCells: {
-                    rows: [{ values: [cellData] }],
-                    fields: fields.join(","),
-                    start: {
-                        sheetId,
-                        ...coordinates,
-                    }
+            if (!isObjectiveChecklistCell(questline.sheet, coordinates)) {
+                if (enableColors && progressColor) {
+                    cellData.userEnteredFormat = {
+                        backgroundColorStyle: {
+                            rgbColor: convertHexColor(progressColor),
+                        },
+                    };
+                    fields.push("userEnteredFormat.backgroundColorStyle");
+                } else if (!enableColors) {
+                    cellData.userEnteredFormat = {
+                        backgroundColorStyle: {
+                            rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
+                        },
+                    };
+                    
+                    fields.push("userEnteredFormat.backgroundColorStyle");
                 }
             }
 
-            batchUpdateRequests.push(batchUpdateRequest);
+            if (fields.length !== 0) {
+                /**
+                 * @type {GoogleAppsScript.Sheets.Schema.Request}
+                 */
+                const batchUpdateRequest = {
+                    updateCells: {
+                        rows: [{ values: [cellData] }],
+                        fields: fields.join(","),
+                        start: {
+                            sheetId,
+                            ...coordinates,
+                        }
+                    }
+                }
+
+                batchUpdateRequests.push(batchUpdateRequest);
+            }
         }
     }
 

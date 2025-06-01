@@ -96,17 +96,26 @@ function convertHexColor(color) {
 }
 
 /**
+ * Returns whether the cell is part of the objective checklist (true) or task
+ * charts (false).
+ * @param {string} sheet
+ * @param {{ rowIndex: number; }} coordinates
+ */
+function isObjectiveChecklistCell(sheet, coordinates) {
+    const checklistLastIndex = (sheet.includes("Rainbow") || sheet === "Endgame")
+        ? 23
+        : 17;
+
+    return coordinates.rowIndex <= checklistLastIndex;
+}
+
+/**
  * Return the default cell color for a specific checkbox.
  * @param {string} sheet
  * @param {{ rowIndex: number; }} coordinates
  */
 function getCellDefaultColor(sheet, coordinates) {
-    // to preserve style we need to know what color to set
-    const checklistLastIndex = (sheet.includes("Rainbow") || sheet === "Endgame")
-        ? 23
-        : 17;
-
-    if (coordinates.rowIndex <= checklistLastIndex) {
+    if (isObjectiveChecklistCell(sheet, coordinates)) {
         // checklist table
         return coordinates.rowIndex % 2 === 0
             ? "#ffffff"
