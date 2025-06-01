@@ -20,6 +20,13 @@ pnpm install
 
 You can use npm/yarn if you prefer them, but please don't check their lockfiles into source control.
 
+### MYT-specific patches
+
+A few changes are needed for the MYT version of the questline sheet. Those patches go into the
+`myt-patches/` directory.
+- Should you change any affected files, please verify if the patches still work.
+- If you patch a new file, please add the patch file into the `Justfile`.
+
 ## License
 
 MIT

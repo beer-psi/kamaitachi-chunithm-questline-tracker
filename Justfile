@@ -1,7 +1,15 @@
+default:
+    just --list
+
 push:
     clasp push
 
-push-m:
-    git apply myt.patch
+apply-myt:
+    git apply myt-patches/.clasp.json.patch myt-patches/src/Data.js.patch myt-patches/src/Code.js.patch
+
+unapply-myt:
+    git apply -R myt-patches/.clasp.json.patch myt-patches/src/Data.js.patch myt-patches/src/Code.js.patch
+
+push-myt: apply-myt
     clasp push
-    git apply -R myt.patch
+    @just unapply-myt
