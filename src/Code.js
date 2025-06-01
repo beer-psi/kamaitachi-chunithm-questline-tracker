@@ -196,23 +196,64 @@ function calculateChartGoals() {
  * Clear all goal checkmarks.
  */
 function clearGoals() {
-    const batchWriteRequest = {
-        valueInputOption: "USER_ENTERED",
-        data: [],
-    };
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+
+    /**
+     * @type {GoogleAppsScript.Sheets.Schema.Request[]}
+     */
+    const batchUpdateRequests = [];
 
     for (const questline of QUESTLINES) {
+        const sheet = spreadsheet.getSheetByName(questline.sheet);
+
+        if (sheet === null) {
+            Logger.log(`Could not get sheet for questline ${questline.sheet}`);
+            continue;
+        }
+
+        const sheetId = sheet.getSheetId();
+
         for (const goal of questline.goals) {
-            batchWriteRequest.data.push({
-                range: `${questline.sheet}!${goal.cell}`,
-                majorDimension: "ROWS",
-                values: [[false]],
-            });
+            const coordinates = convertA1ToRowColumn(goal.cell);
+
+            /**
+             * @type {GoogleAppsScript.Sheets.Schema.CellData}
+             */
+            const cellData = {
+                userEnteredValue: {
+                    boolValue: false,
+                },
+                userEnteredFormat: {
+                    backgroundColorStyle: {
+                        rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
+                    },
+                },
+            };
+
+            /**
+             * @type {GoogleAppsScript.Sheets.Schema.Request}
+             */
+            const batchUpdateRequest = {
+                updateCells: {
+                    rows: [{ values: [cellData] }],
+                    fields: "userEnteredValue,note,userEnteredFormat.backgroundColorStyle",
+                    start: {
+                        sheetId,
+                        ...coordinates,
+                    }
+                }
+            }
+
+            batchUpdateRequests.push(batchUpdateRequest);
         }
     }
-
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    Sheets.Spreadsheets.Values.batchUpdate(batchWriteRequest, spreadsheet.getId());
+    
+    Sheets.Spreadsheets.batchUpdate(
+        {
+            requests: batchUpdateRequests,
+        },
+        spreadsheet.getId()
+    );
 }
 
 /**
@@ -355,26 +396,11 @@ function checkGoals() {
                 };
                 fields.push("userEnteredFormat.backgroundColorStyle");
             } else if (!enableColors) {
-                cellData.userEnteredFormat = {};
-
-                // to preserve style we need to know what color to set
-                const checklistLastIndex = (questline.sheet.includes("Rainbow") || questline.sheet === "Endgame")
-                    ? 23
-                    : 17;
-            
-                if (coordinates.rowIndex <= checklistLastIndex) {
-                    // checklist table
-                    cellData.userEnteredFormat.backgroundColorStyle = {
-                        rgbColor: coordinates.rowIndex % 2 === 0
-                            ? convertHexColor("#ffffff")
-                            : convertHexColor("#efefef"),
-                    };
-                } else {
-                    // chart goals
-                    cellData.userEnteredFormat.backgroundColorStyle = {
-                        rgbColor: convertHexColor("#efefef"),
-                    };
-                }
+                cellData.userEnteredFormat = {
+                    backgroundColorStyle: {
+                        rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
+                    },
+                };
                 
                 fields.push("userEnteredFormat.backgroundColorStyle");
             }
