@@ -282,7 +282,7 @@ const QUESTLINES = [
                 "criteria": {
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.grade",
-                    "value": GRADES.SS,
+                    "value": GRADES.SSS,
                     "countNum": 20,
                 },
             },
