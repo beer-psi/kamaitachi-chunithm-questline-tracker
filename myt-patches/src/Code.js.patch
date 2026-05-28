@@ -2,12 +2,12 @@ diff --git a/src/Code.js b/src/Code.js
 index 76effb8..034deff 100644
 --- a/src/Code.js
 +++ b/src/Code.js
-@@ -16,10 +16,10 @@
+@@ -17,10 +17,10 @@
   * but please leave the credits intact.
   *  
   */
--const CURRENT_CHUNITHM_VERSION = "verse";
-+const CURRENT_CHUNITHM_VERSION = "luminous";
+-const CURRENT_CHUNITHM_VERSION = "xverse";
++const CURRENT_CHUNITHM_VERSION = "verse";
  const CONFIG_CELLS = {
 -    USERNAME: "Home!C18",
 -    ENABLE_GRADE_COLORS: "Home!K53",

@@ -5,10 +5,10 @@ push:
     clasp push
 
 apply-myt:
-    git apply myt-patches/.clasp.json.patch myt-patches/src/Data.js.patch myt-patches/src/Code.js.patch
+    git apply myt-patches/.clasp.json.patch myt-patches/src/Code.js.patch
 
 unapply-myt:
-    git apply -R myt-patches/.clasp.json.patch myt-patches/src/Data.js.patch myt-patches/src/Code.js.patch
+    git apply -R myt-patches/.clasp.json.patch myt-patches/src/Code.js.patch
 
 push-myt: apply-myt
     clasp push
