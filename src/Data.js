@@ -5485,7 +5485,7 @@ const QUESTLINES = [
         "sheet": "Endgame",
         "goals": [
             {
-                // SSS+ 1 chart with in the Level 15+ folder
+                // SSS+ 5 chart with in the Level 15+ folder
                 "cell": "X7",
                 "charts": {
                     "level": ["15+"],
@@ -5494,11 +5494,11 @@ const QUESTLINES = [
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.grade",
                     "value": GRADES.SSS_PLUS,
-                    "countNum": 1,
+                    "countNum": 5,
                 },
             },
             {
-                // SSS+ 80 charts in the Level 15 folder
+                // SSS+ 90 charts in the Level 15 folder
                 "cell": "X8",
                 "charts": {
                     "level": ["15"],
@@ -5507,7 +5507,7 @@ const QUESTLINES = [
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.grade",
                     "value": GRADES.SSS_PLUS,
-                    "countNum": 80,
+                    "countNum": 90,
                 },
             },
             {
@@ -5524,7 +5524,7 @@ const QUESTLINES = [
                 },
             },
             {
-                // ALL JUSTICE 30 charts in the Level 15 folder
+                // ALL JUSTICE 40 charts in the Level 15 folder
                 "cell": "X14",
                 "charts": {
                     "level": ["15"],
@@ -5533,11 +5533,11 @@ const QUESTLINES = [
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.noteLamp",
                     "value": COMBO_LAMPS.ALL_JUSTICE,
-                    "countNum": 30,
+                    "countNum": 40,
                 },
             },
             {
-                // ALL JUSTICE 120 charts in the Level 14+ folder
+                // ALL JUSTICE 140 charts in the Level 14+ folder
                 "cell": "X15",
                 "charts": {
                     "level": ["14+"],
@@ -5546,11 +5546,11 @@ const QUESTLINES = [
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.noteLamp",
                     "value": COMBO_LAMPS.ALL_JUSTICE,
-                    "countNum": 120,
+                    "countNum": 140,
                 },
             },
             {
-                // Clear 50 charts in the Level 15 folder with the Absolute skill (<50 J)
+                // Clear 60 charts in the Level 15 folder with the Absolute skill (<50 J)
                 "cell": "X16",
                 "charts": {
                     "level": ["15"],
@@ -5559,11 +5559,11 @@ const QUESTLINES = [
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.clearLamp",
                     "value": CLEAR_LAMPS.ABSOLUTE,
-                    "countNum": 50,
+                    "countNum": 60,
                 },
             },
             {
-                // Clear 5 charts in the Level 15+ folder with the Brave skill (<150 J)
+                // Clear 10 charts in the Level 15+ folder with the Brave skill (<150 J)
                 "cell": "X17",
                 "charts": {
                     "level": ["15+"],
@@ -5572,7 +5572,7 @@ const QUESTLINES = [
                     "mode": "absolute",
                     "key": "scoreData.enumIndexes.clearLamp",
                     "value": CLEAR_LAMPS.BRAVE,
-                    "countNum": 5,
+                    "countNum": 10,
                 },
             }
         ]
