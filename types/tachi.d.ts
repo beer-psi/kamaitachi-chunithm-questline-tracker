@@ -1,21 +1,59 @@
 declare global {
     type Difficulty = "BASIC" | "ADVANCED" | "EXPERT" | "MASTER" | "ULTIMA";
-    type Grade = "D" | "C" | "B" | "BB" | "BBB" | "A" | "AA" | "AAA" | "S" | "S+" | "SS" | "SS+" | "SSS" | "SSS+";
-    type NoteLamp = "NONE" | "FULL COMBO" | "ALL JUSTICE" | "ALL JUSTICE CRITICAL";
-    type ClearLamp = "FAILED" | "CLEAR" | "HARD" | "BRAVE" | "ABSOLUTE" | "CATASTROPHY";
+    type Grade =
+        | "D"
+        | "C"
+        | "B"
+        | "BB"
+        | "BBB"
+        | "A"
+        | "AA"
+        | "AAA"
+        | "S"
+        | "S+"
+        | "SS"
+        | "SS+"
+        | "SSS"
+        | "SSS+";
+    type NoteLamp =
+        | "NONE"
+        | "FULL COMBO"
+        | "ALL JUSTICE"
+        | "ALL JUSTICE CRITICAL";
+    type ClearLamp =
+        | "FAILED"
+        | "CLEAR"
+        | "HARD"
+        | "BRAVE"
+        | "ABSOLUTE"
+        | "CATASTROPHY";
 
     interface ChartDocument {
-        chartID: string;
+        id: string;
+        legacyChartID: string;
         data: {
+            displayVersion: string;
             inGameID: number;
         };
         difficulty: Difficulty;
         isPrimary: boolean;
         level: string;
         levelNum: number;
-        playtype: "Single";
-        songID: number;
+        songID: string;
         versions: string[];
+    }
+
+    interface SongDocument {
+        id: string;
+        legacySongID: number;
+        title: string;
+        altTitles: string[];
+        searchTerms: string[];
+        artist: string;
+        data: {
+            duration: number;
+            genre: string;
+        };
     }
 
     interface PersonalBest {
@@ -31,7 +69,6 @@ declare global {
         game: string;
         highlight: boolean;
         isPrimary: boolean;
-        playtype: "Single";
         rankingData: {
             rank: number;
             outOf: number;

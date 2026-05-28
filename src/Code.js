@@ -8,6 +8,7 @@
  * - 2025-05-28: Fixed the conditions for 99AJ goals
  * - 2025-05-30: Added goal progress indicator, PB notes for chart goals, feature flags support, and checkbox colors for chart goals (by triple_sigma)
  * - 2025-06-01: Reworked goal progress indicator system
+ * - 2026-05-28: Updated for Tachi v3
  * 
  * You can now contribute to the code by making a pull request on GitHub at
  *     https://github.com/beer-psi/kamaitachi-chunithm-questline-tracker
@@ -16,7 +17,7 @@
  * but please leave the credits intact.
  *  
  */
-const CURRENT_CHUNITHM_VERSION = "verse";
+const CURRENT_CHUNITHM_VERSION = "xverse";
 const CONFIG_CELLS = {
     USERNAME: "Home!C18",
     ENABLE_GRADE_COLORS: "Home!K53",
@@ -39,11 +40,13 @@ function calculateChartGoals() {
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-    const songsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/main/seeds/collections/songs-chunithm.json");
+    const songsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/main/db/seeds/songs-chunithm.json");
+    /** @type {Array<SongDocument>} */
     const songs = JSON.parse(songsResp.getContentText());
     const songsByTitle = new Map(songs.map((s) => [s.title, s]));
 
-    const chartsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/main/seeds/collections/charts-chunithm.json");
+    const chartsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/main/db/seeds/charts-chunithm.json");
+    /** @type {Array<ChartDocument>} */
     const charts = JSON.parse(chartsResp.getContentText());
     const chartsBySongDifficulty = new Map(charts.map((c) => [`${c.songID}-${c.difficulty}`, c]));
 
@@ -129,7 +132,7 @@ function calculateChartGoals() {
                     "title": `${tachiSong.title} [${tachiChart.difficulty}]`,
                     "cell": checkboxRange.getA1Notation(),
                     "charts": {
-                        "chartID": tachiChart.chartID,
+                        "id": tachiChart.id,
                     },
                     "criteria": {
                         "mode": "absolute",
@@ -252,11 +255,14 @@ function clearGoals() {
  * Check if the user has reached goals. Check Data.gs for the goal data format.
  */
 function checkGoals() {
-    const chartsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/refs/heads/main/seeds/collections/charts-chunithm.json");
+    const chartsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/refs/heads/main/db/seeds/charts-chunithm.json");
+
+    /** @type {Array<ChartDocument>} */
     const charts = JSON.parse(chartsResp.getContentText());
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
+    // const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
+    const username = "beerpsi"; 
     const enableColors = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.ENABLE_GRADE_COLORS)["values"][0][0] == "TRUE";
 
     Logger.log("Configuration:");
@@ -265,7 +271,7 @@ function checkGoals() {
 
     Logger.log(`Getting PBs for ${username}`);
 
-    const pbResp = UrlFetchApp.fetch(`https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/Single/pbs/all`);
+    const pbResp = UrlFetchApp.fetch(`https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/pbs/all`);
 
     /**
      * @type {KamaitachiAPIResponse<{ pbs: PersonalBest[] }>}
@@ -308,7 +314,7 @@ function checkGoals() {
 
             Logger.log(`Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(goal.charts)}`);
 
-            const relevantChartIDs = new Set(relevantCharts.map((c) => c.chartID));
+            const relevantChartIDs = new Set(relevantCharts.map((c) => c.id));
             const relevantPBs = data.body.pbs.filter((pb) => relevantChartIDs.has(pb.chartID));
 
             Logger.log(`Found ${relevantPBs.length} relevant PBs for chart condition ${JSON.stringify(goal.charts)}`);
