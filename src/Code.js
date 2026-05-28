@@ -261,8 +261,7 @@ function checkGoals() {
     const charts = JSON.parse(chartsResp.getContentText());
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    // const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
-    const username = "beerpsi"; 
+    const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
     const enableColors = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.ENABLE_GRADE_COLORS)["values"][0][0] == "TRUE";
 
     Logger.log("Configuration:");
