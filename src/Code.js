@@ -228,17 +228,26 @@ function clearGoals() {
             });
 
             if (isObjectiveChecklistCell(questline.sheet, coordinates)) {
-                batchUpdateRequests.push({
-                    updateCells: {
-                        rows: [{ values: [{}] }],
-                        fields: "userEnteredValue",
-                        start: {
-                            sheetId,
-                            rowIndex: coordinates.rowIndex,
-                            columnIndex: coordinates.columnIndex - 2,
+                // single goals use one progress cell (columnIndex - 2)
+                // composite goals also use the cell to its left (columnIndex - 3)
+                // we can just pretend conditions[] is not condition | [condition, condition] :loamer:
+                const progressColumns = Array.isArray(goal.conditions)
+                    ? [coordinates.columnIndex - 2, coordinates.columnIndex - 3]
+                    : [coordinates.columnIndex - 2];
+
+                for (const columnIndex of progressColumns) {
+                    batchUpdateRequests.push({
+                        updateCells: {
+                            rows: [{ values: [{}] }],
+                            fields: "userEnteredValue",
+                            start: {
+                                sheetId,
+                                rowIndex: coordinates.rowIndex,
+                                columnIndex,
+                            },
                         },
-                    },
-                });
+                    });
+                }
             }
         }
     }
@@ -249,6 +258,93 @@ function clearGoals() {
         },
         spreadsheet.getId()
     );
+}
+
+/**
+ * Evaluate a single goal condition (a `{ charts, criteria }` pair) against the user's PBs.
+ *
+ * @param {ChartDocument[]} charts All chart documents.
+ * @param {Condition} condition
+ * @param {PersonalBest[]} pbs All of the user's PBs.
+ * @param {Map<string, PersonalBest>} pbByChartId PBs indexed by chart id.
+ * @returns {{ met: boolean; progress: string; progressColor: string | null; isSingleGoal: boolean; count: number; requiredCount: number; } | null}
+ *   The evaluation result, or null if the criteria mode is unknown.
+ */
+function evaluateCondition(charts, condition, pbs, pbByChartId) {
+    const criteria = condition.criteria;
+    const relevantCharts = filterRelevantCharts(charts, condition);
+
+    if (criteria.mode === "overpower") {
+        const { achievedMicro, maxMicro } = computeOverpower(relevantCharts, pbByChartId, criteria.aggregate);
+        const ratio = maxMicro > 0 ? achievedMicro / maxMicro : 0;
+        const thresholdBp = Math.round(criteria.value * 10000);
+
+        const met = maxMicro > 0 && achievedMicro * 10000 >= thresholdBp * maxMicro;
+        const progress = `${(ratio * 100).toFixed(2)} / ${thresholdBp / 100}`;
+
+        return { met, progress, progressColor: null, isSingleGoal: false, count: 0, requiredCount: 0 };
+    }
+
+    if (criteria.mode !== "absolute" && criteria.mode !== "proportion") {
+        Logger.log(`Unknown goal criteria mode: ${criteria.mode}`);
+        return null;
+    }
+
+    const isSingleGoal = criteria.mode === "absolute" && criteria.countNum === 1;
+
+    Logger.log(`Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(condition.charts)}`);
+
+    const relevantChartIDs = new Set(relevantCharts.map((c) => c.id));
+    const relevantPBs = pbs.filter((pb) => relevantChartIDs.has(pb.chartID));
+
+    Logger.log(`Found ${relevantPBs.length} relevant PBs for chart condition ${JSON.stringify(condition.charts)}`);
+
+    const count = relevantPBs.reduce(
+        (acc, pb) => acc + Number(_getValue(pb, criteria.key) >= criteria.value),
+        0,
+    );
+    let requiredCount = 0;
+
+    if (criteria.mode === "absolute") {
+        requiredCount = criteria.countNum;
+    } else if (criteria.mode === "proportion") {
+        requiredCount = Math.floor(relevantCharts.length * criteria.countNum);
+    }
+
+    const met = count >= requiredCount;
+
+    /** @type {string} */
+    let progress;
+    /** @type {string | null} */
+    let progressColor = null;
+
+    if (isSingleGoal) {
+        /** @type {PersonalBest | undefined} */
+        let bestPB;
+
+        if (relevantCharts.length === 1) {
+            // goal on a single chart
+            bestPB = relevantPBs[0];
+        } else {
+            // goal on any chart
+            const maxProgress = Math.max(...relevantPBs.map((pb) => _getValue(pb, criteria.key)));
+
+            bestPB = relevantPBs.find((pb) => _getValue(pb, criteria.key) === maxProgress);
+        }
+
+        progress = humanizeGoalProgress(criteria.key, criteria.value, bestPB);
+
+        if (bestPB) {
+            progressColor = criteria.key === "scoreData.enumIndexes.grade"
+                ? getProgressColorFromScore(bestPB.scoreData.score)
+                : getProgressColor(_getValue(bestPB, criteria.key) / criteria.value);
+        }
+    } else {
+        progress = `${count} / ${requiredCount}`;
+        progressColor = getProgressColor(count / requiredCount);
+    }
+
+    return { met, progress, progressColor, isSingleGoal, count, requiredCount };
 }
 
 /**
@@ -281,6 +377,9 @@ function checkGoals() {
         throw new Error(`Fetching PBs from Tachi failed: ${data.description}`);
     }
 
+    /** @type {Map<string, PersonalBest>} */
+    const pbByChartId = new Map(data.body.pbs.map((pb) => [pb.chartID, pb]));
+
     // Note that we do not interfere with manually checked goals; we will check a goal as completed
     // if it is completed on Tachi, but that's it.
 
@@ -302,35 +401,35 @@ function checkGoals() {
         const sheetId = sheet.getSheetId();
 
         for (const goal of questline.goals) {
-            if (!["absolute", "proportion"].includes(goal.criteria.mode)) {
-                Logger.log(`Unknown goal criteria mode: ${goal.criteria.mode}`);
+            const coordinates = convertA1ToRowColumn(goal.cell);
+            const isChecklist = isObjectiveChecklistCell(questline.sheet, coordinates);
+            const isComposite = Array.isArray(goal.conditions);
+
+            /** @type {Condition[]} */
+            const conditions = isComposite
+                ? goal.conditions
+                : [{ charts: goal.charts, criteria: goal.criteria }];
+
+            /** @type {ReturnType<typeof evaluateCondition>[]} */
+            const results = [];
+            let validGoal = true;
+
+            for (const condition of conditions) {
+                const result = evaluateCondition(charts, condition, data.body.pbs, pbByChartId);
+
+                if (result === null) {
+                    validGoal = false;
+                    break;
+                }
+
+                results.push(result);
+            }
+
+            if (!validGoal) {
                 continue;
             }
 
-            const coordinates = convertA1ToRowColumn(goal.cell);
-            const isSingleGoal = goal.criteria.mode === "absolute" && goal.criteria.countNum === 1;
-            const relevantCharts = filterRelevantCharts(charts, goal);
-
-            Logger.log(`Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(goal.charts)}`);
-
-            const relevantChartIDs = new Set(relevantCharts.map((c) => c.id));
-            const relevantPBs = data.body.pbs.filter((pb) => relevantChartIDs.has(pb.chartID));
-
-            Logger.log(`Found ${relevantPBs.length} relevant PBs for chart condition ${JSON.stringify(goal.charts)}`);
-
-            const count = relevantPBs.reduce(
-                (acc, pb) => acc + Number(_getValue(pb, goal.criteria.key) >= goal.criteria.value),
-                0,
-            );            
-            let requiredCount = 0;
-
-            if (goal.criteria.mode === "absolute") {
-                requiredCount = goal.criteria.countNum;
-            } else if (goal.criteria.mode === "proportion") {
-                requiredCount = Math.floor(relevantCharts.length * goal.criteria.countNum);
-            }
-            
-            const goalMet = count >= requiredCount;
+            const goalMet = results.every((r) => r.met);
 
             /**
              * @type {GoogleAppsScript.Sheets.Schema.CellData}
@@ -347,69 +446,51 @@ function checkGoals() {
              */
             let progressColor = null;
 
-            /**
-             * @type {string | null}
-             */
-            let progress = null;
+            if (isComposite) {
+                // again we pretend to support more than 2 conditions
+                if (isChecklist) {
+                    const leftProgress = results.slice(1).map((r) => r.progress).join(" | ");
 
-            if (isSingleGoal) {
-                /**
-                 * @type {PersonalBest | undefined}
-                 */
-                let bestPB;
-
-                if (relevantCharts.length === 1) {
-                    // goal on a single chart
-                    bestPB = relevantPBs[0];
+                    batchUpdateRequests.push({
+                        updateCells: {
+                            rows: [{ values: [{ userEnteredValue: { stringValue: results[0].progress } }] }],
+                            fields: "userEnteredValue",
+                            start: {
+                                sheetId,
+                                rowIndex: coordinates.rowIndex,
+                                columnIndex: coordinates.columnIndex - 2,
+                            },
+                        },
+                    });
+                    batchUpdateRequests.push({
+                        updateCells: {
+                            rows: [{ values: [{ userEnteredValue: { stringValue: leftProgress } }] }],
+                            fields: "userEnteredValue",
+                            start: {
+                                sheetId,
+                                rowIndex: coordinates.rowIndex,
+                                columnIndex: coordinates.columnIndex - 3,
+                            },
+                        },
+                    });
                 } else {
-                    // goal on any chart
-                    const maxProgress = Math.max(...relevantPBs.map((pb) => _getValue(pb, goal.criteria.key)));
-
-                    bestPB = relevantPBs.find((pb) => _getValue(pb, goal.criteria.key) === maxProgress);
-                }
-
-                progress = humanizeGoalProgress(goal.criteria.key, goal.criteria.value, bestPB);
-
-                if (bestPB) {
-                    progressColor = goal.criteria.key === "scoreData.enumIndexes.grade"
-                        ? getProgressColorFromScore(bestPB.scoreData.score)
-                        : getProgressColor(_getValue(bestPB, goal.criteria.key) / goal.criteria.value);
+                    cellData.note = results.map((r) => r.progress).join(" | ");
+                    fields.push("note");
                 }
             } else {
-                progress = `${count} / ${requiredCount}`;
-                progressColor = getProgressColor(count / requiredCount);
-            }
+                const result = results[0];
+                const progress = result.progress;
+                progressColor = result.progressColor;
 
-            // Write the progress in the previous cells if it's an objective checklist goal and
-            // is not a single goal.
-            if (progress && isObjectiveChecklistCell(questline.sheet, coordinates) && !isSingleGoal) {
-                batchUpdateRequests.push({
-                    updateCells: {
-                        rows: [
-                            {
-                                values: [
-                                    { userEnteredValue: { stringValue: progress } },
-                                ],
-                            },
-                        ],
-                        fields: "userEnteredValue",
-                        start: {
-                            sheetId,
-                            rowIndex: coordinates.rowIndex,
-                            columnIndex: coordinates.columnIndex - 2,
-                        },
-                    },
-                });
-            } else if (progress) {
-                // Is a single goal, but is an objective checklist goal
-                // (e.g. ALL JUSTICE any chart...)
-                if (isObjectiveChecklistCell(questline.sheet, coordinates)) {
+                // Write the progress in the previous cells if it's an objective checklist goal and
+                // is not a single goal.
+                if (progress && isChecklist && !result.isSingleGoal) {
                     batchUpdateRequests.push({
                         updateCells: {
                             rows: [
                                 {
                                     values: [
-                                        { userEnteredValue: { stringValue: `${count} / ${requiredCount}` } },
+                                        { userEnteredValue: { stringValue: progress } },
                                     ],
                                 },
                             ],
@@ -421,10 +502,32 @@ function checkGoals() {
                             },
                         },
                     });
+                } else if (progress) {
+                    // Is a single goal, but is an objective checklist goal
+                    // (e.g. ALL JUSTICE any chart...)
+                    if (isChecklist) {
+                        batchUpdateRequests.push({
+                            updateCells: {
+                                rows: [
+                                    {
+                                        values: [
+                                            { userEnteredValue: { stringValue: `${result.count} / ${result.requiredCount}` } },
+                                        ],
+                                    },
+                                ],
+                                fields: "userEnteredValue",
+                                start: {
+                                    sheetId,
+                                    rowIndex: coordinates.rowIndex,
+                                    columnIndex: coordinates.columnIndex - 2,
+                                },
+                            },
+                        });
+                    }
+
+                    cellData.note = progress;
+                    fields.push("note");
                 }
-                
-                cellData.note = progress;
-                fields.push("note");
             }
 
             if (goalMet) {
@@ -436,7 +539,7 @@ function checkGoals() {
                 fields.push("userEnteredValue");
             }
 
-            if (!isObjectiveChecklistCell(questline.sheet, coordinates)) {
+            if (!isChecklist) {
                 if (enableColors && progressColor) {
                     cellData.userEnteredFormat = {
                         backgroundColorStyle: {

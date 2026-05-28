@@ -73,17 +73,31 @@ const GRADE_BOUNDARIES = [
  *     - `proportion`: countNum is the proportion of charts (out of 1) to satisfy the criteria before the goal is met (e.g. 0.7 = 70%)
  * 
  * [charts-chunithm.json]: https://raw.githubusercontent.com/zkrising/Tachi/refs/heads/main/db/seeds/charts-chunithm.json
- * 
+ *
+ * OVERPOWER goals use a different criteria shape:
+ *   - mode: "overpower"
+ *   - aggregate: "song" (only the best chart per song counts, used for the overall total) or
+ *     "chart" (every chart counts independently, used for level-folder totals).
+ *   - value: the target proportion of the maximum OP, from 0 to 1 (e.g. 0.96 = 96%).
+ *
+ * A goal may instead be composite: provide a `conditions` array of `{ charts, criteria }` pairs
+ * (omitting top-level `charts`/`criteria`). The goal is met when every condition is met. The
+ * top-level `cell` is always required so the checkbox can be located.
+ *
  * @typedef {{
- *  cell: string;
- *  charts: Record<Leaves<ChartDocument>, any>;
- *  criteria: {
- *    mode: "absolute" | "proportion";
- *    key: Leaves<PersonalBest>;
- *    value: number;
- *    countNum: number;
- *  }
- * }} Goal
+ *   mode: "absolute" | "proportion";
+ *   key: Leaves<PersonalBest>;
+ *   value: number;
+ *   countNum: number;
+ * } | {
+ *   mode: "overpower";
+ *   aggregate: "song" | "chart";
+ *   value: number;
+ * }} Criteria
+ *
+ * @typedef {{ charts: Record<Leaves<ChartDocument>, any>; criteria: Criteria; }} Condition
+ *
+ * @typedef {{ cell: string } & (Condition | { conditions: Condition[] })} Goal
  */
 /**
  * An object defining a questline.
@@ -2348,6 +2362,16 @@ const QUESTLINES = [
         "sheet": "Rainbow I",
         "goals": [
             {
+                // Reach 40% OVERPOWER
+                "cell": "Z19",
+                "charts": {},
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "song",
+                    "value": 0.40,
+                },
+            },
+            {
                 // SSS 1 chart in the Level 14+ folder
                 "cell": "Z7",
                 "charts": {
@@ -2873,6 +2897,16 @@ const QUESTLINES = [
         "sheet": "Rainbow II",
         "goals": [
             {
+                // Reach 60% OVERPOWER
+                "cell": "Z19",
+                "charts": {},
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "song",
+                    "value": 0.60,
+                },
+            },
+            {
                 // SSS 5 charts in the Level 14+ folder
                 "cell": "Z7",
                 "charts": {
@@ -3397,6 +3431,16 @@ const QUESTLINES = [
     {
         "sheet": "Rainbow III",
         "goals": [
+            {
+                // Reach 80% OVERPOWER
+                "cell": "Z19",
+                "charts": {},
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "song",
+                    "value": 0.80,
+                },
+            },
             {
                 // Achieve 10 scores of at least 16.75 rating
                 "cell": "Z7",
@@ -4474,6 +4518,55 @@ const QUESTLINES = [
         "sheet": "Rainbow EX",
         "goals": [
             {
+                // Obtain Gold Possession (S+ on all MASTER and ULTIMA charts, 97.5% OVERPOWER)
+                "cell": "Z19",
+                "conditions": [
+                    {
+                        "charts": {},
+                        "criteria": {
+                            "mode": "overpower",
+                            "aggregate": "song",
+                            "value": 0.975,
+                        },
+                    },
+                    {
+                        "charts": {
+                            "difficulty": ["MASTER", "ULTIMA"],
+                        },
+                        "criteria": {
+                            "mode": "proportion",
+                            "key": "scoreData.enumIndexes.grade",
+                            "value": GRADES.S_PLUS,
+                            "countNum": 1,
+                        },
+                    },
+                ],
+            },
+            {
+                // Reach 96% OP in the Level 14 folder
+                "cell": "Z20",
+                "charts": {
+                    "level": ["14"],
+                },
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "chart",
+                    "value": 0.96,
+                },
+            },
+            {
+                // Reach 94% OP in the Level 14+ folder
+                "cell": "Z21",
+                "charts": {
+                    "level": ["14+"],
+                },
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "chart",
+                    "value": 0.94,
+                },
+            },
+            {
                 // Achieve 10 scores of at least 17.20 rating
                 "cell": "Z7",
                 "charts": {
@@ -4946,6 +5039,67 @@ const QUESTLINES = [
     {
         "sheet": "Rainbow EX+",
         "goals": [
+            {
+                // Obtain Platinum Possession (SS on all MASTER and ULTIMA charts, 99% OVERPOWER)
+                "cell": "Z19",
+                "conditions": [
+                    {
+                        "charts": {},
+                        "criteria": {
+                            "mode": "overpower",
+                            "aggregate": "song",
+                            "value": 0.99,
+                        },
+                    },
+                    {
+                        "charts": {
+                            "difficulty": ["MASTER", "ULTIMA"],
+                        },
+                        "criteria": {
+                            "mode": "proportion",
+                            "key": "scoreData.enumIndexes.grade",
+                            "value": GRADES.SS,
+                            "countNum": 1,
+                        },
+                    },
+                ],
+            },
+            {
+                // Reach 99% OP in the Level 14 folder
+                "cell": "Z20",
+                "charts": {
+                    "level": ["14"],
+                },
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "chart",
+                    "value": 0.99,
+                },
+            },
+            {
+                // Reach 97% OP in the Level 14+ folder
+                "cell": "Z21",
+                "charts": {
+                    "level": ["14+"],
+                },
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "chart",
+                    "value": 0.97,
+                },
+            },
+            {
+                // Reach 95% OP in the Level 15 folder
+                "cell": "Z22",
+                "charts": {
+                    "level": ["15"],
+                },
+                "criteria": {
+                    "mode": "overpower",
+                    "aggregate": "chart",
+                    "value": 0.95,
+                },
+            },
             {
                 // Achieve 10 scores of at least 17.35 rating
                 "cell": "Z7",
@@ -5484,6 +5638,31 @@ const QUESTLINES = [
     {
         "sheet": "Endgame",
         "goals": [
+            {
+                // Obtain Rainbow Possession (SSS on all MASTER and ULTIMA charts, 99.5% OVERPOWER)
+                "cell": "X19",
+                "conditions": [
+                    {
+                        "charts": {},
+                        "criteria": {
+                            "mode": "overpower",
+                            "aggregate": "song",
+                            "value": 0.995,
+                        },
+                    },
+                    {
+                        "charts": {
+                            "difficulty": ["MASTER", "ULTIMA"],
+                        },
+                        "criteria": {
+                            "mode": "proportion",
+                            "key": "scoreData.enumIndexes.grade",
+                            "value": GRADES.SSS,
+                            "countNum": 1,
+                        },
+                    },
+                ],
+            },
             {
                 // SSS+ 1 chart with in the Level 15+ folder
                 "cell": "X7",
