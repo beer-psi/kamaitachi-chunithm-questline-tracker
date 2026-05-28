@@ -65,15 +65,15 @@ function overpowerBaseMicro(score, il10000) {
  * Play OP for a personal best: base OP plus combo-lamp bonuses, in micro-units.
  * @param {number} score
  * @param {number} il10000
- * @param {number} noteLamp 0 = NONE, 1 = FULL COMBO, 2 = ALL JUSTICE, 3 = ALL JUSTICE CRITICAL
+ * @param {number} noteLamp
  * @returns {number}
  */
 function playOverpowerMicro(score, il10000, noteLamp) {
     let op = overpowerBaseMicro(score, il10000);
 
-    if (noteLamp >= 1) op += 500000; // FULL COMBO
-    if (noteLamp >= 2) op += 500000; // ALL JUSTICE
-    if (noteLamp === 3) op += 250000; // ALL JUSTICE CRITICAL
+    if (noteLamp >= COMBO_LAMPS.FULL_COMBO) op += 500000;
+    if (noteLamp >= COMBO_LAMPS.ALL_JUSTICE) op += 500000;
+    if (noteLamp >= COMBO_LAMPS.ALL_JUSTICE_CRITICAL) op += 250000;
 
     return op;
 }
