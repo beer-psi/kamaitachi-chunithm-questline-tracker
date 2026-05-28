@@ -11,6 +11,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.6.3",
   "devDependencies": {
+    "@google/clasp": "^3.3.0",
     "@types/google-apps-script": "^1.0.97"
   }
 }
