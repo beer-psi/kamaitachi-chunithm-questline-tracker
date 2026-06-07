@@ -20,8 +20,8 @@ function _getValue(obj, key) {
 
 /**
  * Find charts that are relevant to the provided goal.
- * @param {ChartDocument[]} charts 
- * @param {Goal} goal 
+ * @param {ChartDocument[]} charts
+ * @param {Goal} goal
  */
 function filterRelevantCharts(charts, goal) {
     return charts.filter((c) => {
@@ -56,10 +56,10 @@ function filterRelevantCharts(charts, goal) {
 
 /**
  * Converts a cell coordinate in A1 notation to a { rowIndex, columnIndex } object.
- * @param {string} cell 
+ * @param {string} cell
  * @returns {{ rowIndex: number; columnIndex: number; }}
  */
-function convertA1ToRowColumn(cell) {    
+function convertA1ToRowColumn(cell) {
     const match = cell.match(/(?<column>[A-Z]+)(?<row>[0-9]+)/u);
 
     if (!match) {
@@ -69,8 +69,9 @@ function convertA1ToRowColumn(cell) {
     let columnIndex = 0;
 
     for (let i = match.groups.column.length - 1; i >= 0; i--) {
-        columnIndex += Math.pow(26, i) * (match.groups.column.charCodeAt(i) - 64);
-    }    
+        columnIndex +=
+            Math.pow(26, i) * (match.groups.column.charCodeAt(i) - 64);
+    }
 
     return {
         rowIndex: Number(match.groups.row) - 1,
@@ -79,12 +80,14 @@ function convertA1ToRowColumn(cell) {
 }
 
 /**
- * 
- * @param {string} color 
+ *
+ * @param {string} color
  * @returns {{ red: number; green: number; blue: number; alpha: number; }}
  */
 function convertHexColor(color) {
-    const match = color.match(/#(?<r>[0-9a-f]{2})(?<g>[0-9a-f]{2})(?<b>[0-9a-f]{2})(?<a>[0-9a-f]{2})?/ui);
+    const match = color.match(
+        /#(?<r>[0-9a-f]{2})(?<g>[0-9a-f]{2})(?<b>[0-9a-f]{2})(?<a>[0-9a-f]{2})?/iu,
+    );
 
     if (!match) {
         throw new Error(`Invalid hex color code: ${color}`);
@@ -93,7 +96,8 @@ function convertHexColor(color) {
     const red = Number.parseInt(match.groups.r, 16) / 255;
     const green = Number.parseInt(match.groups.g, 16) / 255;
     const blue = Number.parseInt(match.groups.b, 16) / 255;
-    const alpha = (match.groups.a ? Number.parseInt(match.groups.a, 16) : 255) / 255;
+    const alpha =
+        (match.groups.a ? Number.parseInt(match.groups.a, 16) : 255) / 255;
 
     return { red, green, blue, alpha };
 }
@@ -105,9 +109,12 @@ function convertHexColor(color) {
  * @param {{ rowIndex: number; }} coordinates
  */
 function isObjectiveChecklistCell(sheet, coordinates) {
-    const checklistLastIndex = (sheet.includes("Rainbow") || sheet === "Endgame")
-        ? 23
-        : 17;
+    const checklistLastIndex =
+        sheet.includes("Rainbow") ||
+        sheet.includes("Kiwami") ||
+        sheet === "Endgame"
+            ? 23
+            : 17;
 
     return coordinates.rowIndex <= checklistLastIndex;
 }
@@ -120,9 +127,7 @@ function isObjectiveChecklistCell(sheet, coordinates) {
 function getCellDefaultColor(sheet, coordinates) {
     if (isObjectiveChecklistCell(sheet, coordinates)) {
         // checklist table
-        return coordinates.rowIndex % 2 === 0
-            ? "#ffffff"
-            : "#efefef";
+        return coordinates.rowIndex % 2 === 0 ? "#ffffff" : "#efefef";
     } else {
         // chart goals
         return "#efefef";

@@ -1,26 +1,27 @@
 // SPDX-License-Identifier: MIT
 /**
  * Kamaitachi Questline Tracker
- * 
+ *
  * Created by beerpsi on 2025-05-27.
- * 
+ *
  * Changelog:
  * - 2025-05-28: Fixed the conditions for 99AJ goals
  * - 2025-05-30: Added goal progress indicator, PB notes for chart goals, feature flags support, and checkbox colors for chart goals (by triple_sigma)
  * - 2025-06-01: Reworked goal progress indicator system
  * - 2026-05-28: Updated for Tachi v3
- * 
+ * - 2026-06-07: Updated goals for questline v2.5
+ *
  * You can now contribute to the code by making a pull request on GitHub at
  *     https://github.com/beer-psi/kamaitachi-chunithm-questline-tracker
- * 
+ *
  * Licensed under the MIT license. You can use this as a base for another questline tracker,
  * but please leave the credits intact.
- *  
+ *
  */
-const CURRENT_CHUNITHM_VERSION = "xverse";
+const CURRENT_CHUNITHM_VERSION = "xversex";
 const CONFIG_CELLS = {
     USERNAME: "Home!C18",
-    ENABLE_GRADE_COLORS: "Home!K53",
+    ENABLE_GRADE_COLORS: "Home!K56",
 };
 
 /**
@@ -28,34 +29,45 @@ const CONFIG_CELLS = {
  * This doesn't convert into actual goal objects, but something very close, for later postprocessing:
  * - Replace /"title": "(.+?)",/ with "// $1"
  * - Unquote value enums (e.g. `"GRADES.SSS"` -> `GRADES.SSS`)
- * 
+ *
  * The JSONs are outputted into the "For tluo" sheet, just because.
  */
 function calculateChartGoals() {
     const MANUAL_TITLE_MAPPING = {
-        "少女幻葬戦慄曲 ～ Necro Fantasia": "少女幻葬戦慄曲　～　Necro Fantasia",
+        "少女幻葬戦慄曲 ～ Necro Fantasia":
+            "少女幻葬戦慄曲　～　Necro Fantasia",
         "札付きのワル ～マイケルのうた～": "札付きのワル　～マイケルのうた～",
         "ÅMARA(大未来電脳)": "ÅMARA (大未来電脳)",
     };
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-    const songsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/main/db/seeds/songs-chunithm.json");
+    const songsResp = UrlFetchApp.fetch(
+        "https://raw.githubusercontent.com/zkrising/Tachi/main/db/seeds/songs-chunithm.json",
+    );
     /** @type {Array<SongDocument>} */
     const songs = JSON.parse(songsResp.getContentText());
     const songsByTitle = new Map(songs.map((s) => [s.title, s]));
 
-    const chartsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/main/db/seeds/charts-chunithm.json");
+    const chartsResp = UrlFetchApp.fetch(
+        "https://raw.githubusercontent.com/zkrising/Tachi/main/db/seeds/charts-chunithm.json",
+    );
     /** @type {Array<ChartDocument>} */
     const charts = JSON.parse(chartsResp.getContentText());
-    const chartsBySongDifficulty = new Map(charts.map((c) => [`${c.songID}-${c.difficulty}`, c]));
+    const chartsBySongDifficulty = new Map(
+        charts.map((c) => [`${c.songID}-${c.difficulty}`, c]),
+    );
 
     const questlineChartGoals = [];
 
     for (const questline of QUESTLINES) {
         const goals = [];
 
-        if (questline.sheet === "Purple" || questline.sheet === "Bronze" || questline.sheet === "Endgame") {
+        if (
+            questline.sheet === "Purple" ||
+            questline.sheet === "Bronze" ||
+            questline.sheet === "Endgame"
+        ) {
             // These questlines do not have chart goals
             continue;
         }
@@ -68,7 +80,11 @@ function calculateChartGoals() {
         }
 
         // Rainbow questlines have overpower goals, so that shifts the starting row down a bit
-        const startingRow = questline.sheet.includes("Rainbow") ? 30 : 24;
+        const startingRow =
+            questline.sheet.includes("Rainbow") ||
+            questline.sheet.includes("Kiwami")
+                ? 30
+                : 24;
 
         for (const checkboxColumn of ["F", "K", "P", "U", "AA"]) {
             for (let i = startingRow; ; i += 2) {
@@ -81,18 +97,31 @@ function calculateChartGoals() {
                 const hasCheckbox = checkboxRange
                     .getDataValidations()
                     .every((r) =>
-                        r.every((c) =>
-                            c && c.getCriteriaType() === SpreadsheetApp.DataValidationCriteria.CHECKBOX
-                        )
+                        r.every(
+                            (c) =>
+                                c &&
+                                c.getCriteriaType() ===
+                                    SpreadsheetApp.DataValidationCriteria
+                                        .CHECKBOX,
+                        ),
                     );
 
                 if (!hasCheckbox) {
                     break;
                 }
 
-                const songTitleColumn = checkboxColumn === "AA" ? "X" : String.fromCharCode(checkboxColumn.charCodeAt(0) - 3);
-                const songTitleRange = sheet.getRange(`${songTitleColumn}${i - 1}:${checkboxColumn}${i - 1}`);
-                let songTitle = songTitleRange.getValue().toString().replace("\n", " ").trim();
+                const songTitleColumn =
+                    checkboxColumn === "AA"
+                        ? "X"
+                        : String.fromCharCode(checkboxColumn.charCodeAt(0) - 3);
+                const songTitleRange = sheet.getRange(
+                    `${songTitleColumn}${i - 1}:${checkboxColumn}${i - 1}`,
+                );
+                let songTitle = songTitleRange
+                    .getValue()
+                    .toString()
+                    .replace("\n", " ")
+                    .trim();
 
                 if (MANUAL_TITLE_MAPPING[songTitle]) {
                     songTitle = MANUAL_TITLE_MAPPING[songTitle];
@@ -118,10 +147,14 @@ function calculateChartGoals() {
                     continue;
                 }
 
-                const tachiChart = chartsBySongDifficulty.get(`${tachiSong.id}-${difficulty}`);
+                const tachiChart = chartsBySongDifficulty.get(
+                    `${tachiSong.id}-${difficulty}`,
+                );
 
                 if (!tachiChart) {
-                    console.warn(`Could not get Tachi chart for ${songTitle} [${difficulty}].`);
+                    console.warn(
+                        `Could not get Tachi chart for ${songTitle} [${difficulty}].`,
+                    );
                     continue;
                 }
 
@@ -129,15 +162,15 @@ function calculateChartGoals() {
                     // we don't actually use the title but this is for postprocessing
                     // i.e. transforming the title into a comment, similar to the large
                     // QUESTLINE object above.
-                    "title": `${tachiSong.title} [${tachiChart.difficulty}]`,
-                    "cell": checkboxRange.getA1Notation(),
-                    "charts": {
-                        "id": tachiChart.id,
+                    title: `${tachiSong.title} [${tachiChart.difficulty}]`,
+                    cell: checkboxRange.getA1Notation(),
+                    charts: {
+                        id: tachiChart.id,
                     },
-                    "criteria": {
-                        "mode": "absolute",
-                        "countNum": 1,
-                    }
+                    criteria: {
+                        mode: "absolute",
+                        countNum: 1,
+                    },
                 };
 
                 if (checkboxColumn === "AA") {
@@ -159,7 +192,7 @@ function calculateChartGoals() {
     const batchWriteRequest = {
         valueInputOption: "USER_ENTERED",
         data: [],
-    }
+    };
     for (const item of questlineChartGoals) {
         const data = JSON.stringify(item.goals, null, 4);
 
@@ -212,10 +245,15 @@ function clearGoals() {
                                     },
                                     userEnteredFormat: {
                                         backgroundColorStyle: {
-                                            rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
+                                            rgbColor: convertHexColor(
+                                                getCellDefaultColor(
+                                                    questline.sheet,
+                                                    coordinates,
+                                                ),
+                                            ),
                                         },
                                     },
-                                }
+                                },
                             ],
                         },
                     ],
@@ -223,8 +261,8 @@ function clearGoals() {
                     start: {
                         sheetId,
                         ...coordinates,
-                    }
-                }
+                    },
+                },
             });
 
             if (isObjectiveChecklistCell(questline.sheet, coordinates)) {
@@ -242,12 +280,12 @@ function clearGoals() {
             }
         }
     }
-    
+
     Sheets.Spreadsheets.batchUpdate(
         {
             requests: batchUpdateRequests,
         },
-        spreadsheet.getId()
+        spreadsheet.getId(),
     );
 }
 
@@ -255,14 +293,23 @@ function clearGoals() {
  * Check if the user has reached goals. Check Data.gs for the goal data format.
  */
 function checkGoals() {
-    const chartsResp = UrlFetchApp.fetch("https://raw.githubusercontent.com/zkrising/Tachi/refs/heads/main/db/seeds/charts-chunithm.json");
+    const chartsResp = UrlFetchApp.fetch(
+        "https://raw.githubusercontent.com/zkrising/Tachi/refs/heads/main/db/seeds/charts-chunithm.json",
+    );
 
     /** @type {Array<ChartDocument>} */
     const charts = JSON.parse(chartsResp.getContentText());
 
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const username = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.USERNAME)["values"][0][0];
-    const enableColors = Sheets.Spreadsheets.Values.get(spreadsheet.getId(), CONFIG_CELLS.ENABLE_GRADE_COLORS)["values"][0][0] == "TRUE";
+    const username = Sheets.Spreadsheets.Values.get(
+        spreadsheet.getId(),
+        CONFIG_CELLS.USERNAME,
+    )["values"][0][0];
+    const enableColors =
+        Sheets.Spreadsheets.Values.get(
+            spreadsheet.getId(),
+            CONFIG_CELLS.ENABLE_GRADE_COLORS,
+        )["values"][0][0] == "TRUE";
 
     Logger.log("Configuration:");
     Logger.log(`- Username: ${username}`);
@@ -270,7 +317,9 @@ function checkGoals() {
 
     Logger.log(`Getting PBs for ${username}`);
 
-    const pbResp = UrlFetchApp.fetch(`https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/pbs/all`);
+    const pbResp = UrlFetchApp.fetch(
+        `https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/pbs/all`,
+    );
 
     /**
      * @type {KamaitachiAPIResponse<{ pbs: PersonalBest[] }>}
@@ -308,28 +357,42 @@ function checkGoals() {
             }
 
             const coordinates = convertA1ToRowColumn(goal.cell);
-            const isSingleGoal = goal.criteria.mode === "absolute" && goal.criteria.countNum === 1;
+            const isSingleGoal =
+                goal.criteria.mode === "absolute" &&
+                goal.criteria.countNum === 1;
             const relevantCharts = filterRelevantCharts(charts, goal);
 
-            Logger.log(`Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(goal.charts)}`);
+            Logger.log(
+                `Found ${relevantCharts.length} relevant charts for chart condition ${JSON.stringify(goal.charts)}`,
+            );
 
             const relevantChartIDs = new Set(relevantCharts.map((c) => c.id));
-            const relevantPBs = data.body.pbs.filter((pb) => relevantChartIDs.has(pb.chartID));
+            const relevantPBs = data.body.pbs.filter((pb) =>
+                relevantChartIDs.has(pb.chartID),
+            );
 
-            Logger.log(`Found ${relevantPBs.length} relevant PBs for chart condition ${JSON.stringify(goal.charts)}`);
+            Logger.log(
+                `Found ${relevantPBs.length} relevant PBs for chart condition ${JSON.stringify(goal.charts)}`,
+            );
 
             const count = relevantPBs.reduce(
-                (acc, pb) => acc + Number(_getValue(pb, goal.criteria.key) >= goal.criteria.value),
+                (acc, pb) =>
+                    acc +
+                    Number(
+                        _getValue(pb, goal.criteria.key) >= goal.criteria.value,
+                    ),
                 0,
-            );            
+            );
             let requiredCount = 0;
 
             if (goal.criteria.mode === "absolute") {
                 requiredCount = goal.criteria.countNum;
             } else if (goal.criteria.mode === "proportion") {
-                requiredCount = Math.floor(relevantCharts.length * goal.criteria.countNum);
+                requiredCount = Math.round(
+                    relevantCharts.length * goal.criteria.countNum,
+                );
             }
-            
+
             const goalMet = count >= requiredCount;
 
             /**
@@ -363,17 +426,32 @@ function checkGoals() {
                     bestPB = relevantPBs[0];
                 } else {
                     // goal on any chart
-                    const maxProgress = Math.max(...relevantPBs.map((pb) => _getValue(pb, goal.criteria.key)));
+                    const maxProgress = Math.max(
+                        ...relevantPBs.map((pb) =>
+                            _getValue(pb, goal.criteria.key),
+                        ),
+                    );
 
-                    bestPB = relevantPBs.find((pb) => _getValue(pb, goal.criteria.key) === maxProgress);
+                    bestPB = relevantPBs.find(
+                        (pb) =>
+                            _getValue(pb, goal.criteria.key) === maxProgress,
+                    );
                 }
 
-                progress = humanizeGoalProgress(goal.criteria.key, goal.criteria.value, bestPB);
+                progress = humanizeGoalProgress(
+                    goal.criteria.key,
+                    goal.criteria.value,
+                    bestPB,
+                );
 
                 if (bestPB) {
-                    progressColor = goal.criteria.key === "scoreData.enumIndexes.grade"
-                        ? getProgressColorFromScore(bestPB.scoreData.score)
-                        : getProgressColor(_getValue(bestPB, goal.criteria.key) / goal.criteria.value);
+                    progressColor =
+                        goal.criteria.key === "scoreData.enumIndexes.grade"
+                            ? getProgressColorFromScore(bestPB.scoreData.score)
+                            : getProgressColor(
+                                  _getValue(bestPB, goal.criteria.key) /
+                                      goal.criteria.value,
+                              );
                 }
             } else {
                 progress = `${count} / ${requiredCount}`;
@@ -382,13 +460,21 @@ function checkGoals() {
 
             // Write the progress in the previous cells if it's an objective checklist goal and
             // is not a single goal.
-            if (progress && isObjectiveChecklistCell(questline.sheet, coordinates) && !isSingleGoal) {
+            if (
+                progress &&
+                isObjectiveChecklistCell(questline.sheet, coordinates) &&
+                !isSingleGoal
+            ) {
                 batchUpdateRequests.push({
                     updateCells: {
                         rows: [
                             {
                                 values: [
-                                    { userEnteredValue: { stringValue: progress } },
+                                    {
+                                        userEnteredValue: {
+                                            stringValue: progress,
+                                        },
+                                    },
                                 ],
                             },
                         ],
@@ -409,7 +495,11 @@ function checkGoals() {
                             rows: [
                                 {
                                     values: [
-                                        { userEnteredValue: { stringValue: `${count} / ${requiredCount}` } },
+                                        {
+                                            userEnteredValue: {
+                                                stringValue: `${count} / ${requiredCount}`,
+                                            },
+                                        },
                                     ],
                                 },
                             ],
@@ -422,7 +512,7 @@ function checkGoals() {
                         },
                     });
                 }
-                
+
                 cellData.note = progress;
                 fields.push("note");
             }
@@ -431,7 +521,7 @@ function checkGoals() {
                 Logger.log(`Goal met: ${questline.sheet}!${goal.cell}`);
 
                 cellData.userEnteredValue = {
-                    boolValue: true
+                    boolValue: true,
                 };
                 fields.push("userEnteredValue");
             }
@@ -447,10 +537,15 @@ function checkGoals() {
                 } else if (!enableColors) {
                     cellData.userEnteredFormat = {
                         backgroundColorStyle: {
-                            rgbColor: convertHexColor(getCellDefaultColor(questline.sheet, coordinates)),
+                            rgbColor: convertHexColor(
+                                getCellDefaultColor(
+                                    questline.sheet,
+                                    coordinates,
+                                ),
+                            ),
                         },
                     };
-                    
+
                     fields.push("userEnteredFormat.backgroundColorStyle");
                 }
             }
@@ -466,9 +561,9 @@ function checkGoals() {
                         start: {
                             sheetId,
                             ...coordinates,
-                        }
-                    }
-                }
+                        },
+                    },
+                };
 
                 batchUpdateRequests.push(batchUpdateRequest);
             }
@@ -479,6 +574,6 @@ function checkGoals() {
         {
             requests: batchUpdateRequests,
         },
-        spreadsheet.getId()
+        spreadsheet.getId(),
     );
 }
