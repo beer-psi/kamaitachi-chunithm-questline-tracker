@@ -2240,7 +2240,7 @@ const QUESTLINES = [
                 },
             },
             {
-                // SS 50 charts in the Level 14 folder
+                // SS+ 50 charts in the Level 14 folder
                 cell: "Z17",
                 charts: {
                     level: "14",
@@ -2249,7 +2249,7 @@ const QUESTLINES = [
                     mode: "absolute",
                     countNum: 50,
                     key: "scoreData.enumIndexes.grade",
-                    value: GRADES.SS,
+                    value: GRADES.SS_PLUS,
                 },
             },
             {
@@ -2761,7 +2761,7 @@ const QUESTLINES = [
                 },
             },
             {
-                // SS 60 charts in the Level 14 folder
+                // SS+ 60 charts in the Level 14 folder
                 cell: "Z17",
                 charts: {
                     level: "14",
@@ -2770,7 +2770,7 @@ const QUESTLINES = [
                     mode: "absolute",
                     countNum: 60,
                     key: "scoreData.enumIndexes.grade",
-                    value: GRADES.SS,
+                    value: GRADES.SS_PLUS,
                 },
             },
             {
