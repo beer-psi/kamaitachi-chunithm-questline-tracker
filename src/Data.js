@@ -4506,6 +4506,45 @@ const QUESTLINES = [
                 },
             },
             {
+                // 並行天涯 [MASTER]
+                cell: "K38",
+                charts: {
+                    id: "C19d35e14247326f565e",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.grade",
+                    value: GRADES.SSS,
+                },
+            },
+            {
+                // GIGA DRIVE [MASTER]
+                cell: "K40",
+                charts: {
+                    id: "C19d35e14247326f565e",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.grade",
+                    value: GRADES.SSS,
+                },
+            },
+            {
+                // 《破滅》 ～ Rhapsody for The End [MASTER]
+                cell: "K42",
+                charts: {
+                    id: "C19d35e14247326f565e",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.grade",
+                    value: GRADES.SSS,
+                },
+            },
+            {
                 // Opfer [MASTER]
                 cell: "P30",
                 charts: {
