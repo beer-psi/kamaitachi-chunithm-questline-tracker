@@ -4454,6 +4454,19 @@ const QUESTLINES = [
                 },
             },
             {
+                // Air [ULTIMA]
+                cell: "F42",
+                charts: {
+                    id: "C19d35e14247326f565e",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.grade",
+                    value: GRADES.SSS,
+                },
+            },
+            {
                 // 電光石火 [MASTER]
                 cell: "K30",
                 charts: {
@@ -4701,6 +4714,32 @@ const QUESTLINES = [
                 },
             },
             {
+                // ERIS -Legend of Gaidelia- [ULTIMA]
+                cell: "U40",
+                charts: {
+                    id: "C19d35e14247326f565e",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.grade",
+                    value: GRADES.SSS,
+                },
+            },
+            {
+                // 雪男 [MASTER]
+                cell: "U42",
+                charts: {
+                    id: "C19d35e14247326f565e",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.grade",
+                    value: GRADES.SSS,
+                },
+            },
+            {
                 // ジングルベル [ULTIMA]
                 cell: "AA30",
                 charts: {
@@ -4770,6 +4809,19 @@ const QUESTLINES = [
                 cell: "AA40",
                 charts: {
                     id: "C19d35e13769e503c137",
+                },
+                criteria: {
+                    mode: "absolute",
+                    countNum: 1,
+                    key: "scoreData.enumIndexes.clearLamp",
+                    value: CLEAR_LAMPS.CLEAR,
+                },
+            },
+            {
+                // Dengeki Tube [MASTER]
+                cell: "AA42",
+                charts: {
+                    id: "C19d35e14247326f565e",
                 },
                 criteria: {
                     mode: "absolute",
