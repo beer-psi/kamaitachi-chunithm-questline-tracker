@@ -5157,10 +5157,10 @@ const QUESTLINES = [
                 },
             },
             {
-                // Vampire [ULTIMA]
+                // ΩΩPARTS
                 cell: "U30",
                 charts: {
-                    id: "C19d35e138f475e4b3d8",
+                    id: "C19d35e141195076582e",
                 },
                 criteria: {
                     mode: "absolute",
